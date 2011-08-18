@@ -2627,6 +2627,20 @@ static inline void process_get_command(conn *c, token_t *tokens, size_t ntokens,
                 {
                   MEMCACHED_COMMAND_GET(c->sfd, ITEM_key(it), it->nkey,
                                         it->nbytes, ITEM_get_cas(it));
+                  char * start_flags = ITEM_suffix(it) + 1; /* include heading space */
+                  size_t npos = strchr( start_flags, ' ' ) - start_flags;
+                  if ( it->it_flags & ITEM_EXPIRED ) {
+                    unsigned short client_flags = atoi( start_flags );
+                    client_flags |= FLAG_EXPIRED;
+                    /* because the passing from n digits to n+1 digits is not affected 
+                     * by the "|=" operation we can be sure that the length of the conversion
+                     * will be the same
+                     * */
+                    
+                    sprintf( start_flags, "%d", client_flags ); 
+                    *(start_flags + npos) = ' ';
+                  }
+                  
                   if (add_iov(c, "VALUE ", 6) != 0 ||
                       add_iov(c, ITEM_key(it), it->nkey) != 0 ||
                       add_iov(c, ITEM_suffix(it), it->nsuffix + it->nbytes) != 0)
@@ -2635,7 +2649,6 @@ static inline void process_get_command(conn *c, token_t *tokens, size_t ntokens,
                           break;
                       }
                 }
-
 
                 if (settings.verbose > 1)
                     fprintf(stderr, ">%d sending key %s\n", c->sfd, ITEM_key(it));

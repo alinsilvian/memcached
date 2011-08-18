@@ -511,8 +511,8 @@ item *do_item_get(const char *key, const size_t nkey) {
     }
 
     if (it != NULL && it->exptime != 0 && it->exptime <= current_time) {
-        do_item_unlink(it);           /* MTSAFE - cache_lock held */
-        it = NULL;
+        /* do_item_unlink(it);            MTSAFE - cache_lock held */ /* just set a flag */
+				it->it_flags |= ITEM_EXPIRED;
     }
 
     if (it == NULL && was_found) {

@@ -292,6 +292,10 @@ extern struct settings settings;
 /* temp */
 #define ITEM_SLABBED 4
 
+/* own */
+#define ITEM_EXPIRED 8 /* test internally if the item is expired */
+#define FLAG_EXPIRED 1 /* this is added to the client flags */
+
 /**
  * Structure for storing items within memcached.
  */
